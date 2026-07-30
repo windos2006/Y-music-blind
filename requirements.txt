@@ -1,0 +1,18 @@
+#python3.12.10win x64
+altgraph==0.17.5
+certifi==2026.7.22
+charset-normalizer==3.4.9
+idna==3.18
+packaging==26.2
+pefile==2024.8.26
+pyinstaller==6.21.0
+pyinstaller-hooks-contrib==2026.6
+PySocks==1.7.1
+pywin32==312
+pywin32-ctypes==0.2.3
+requests==2.34.2
+setuptools==83.0.0
+typing_extensions==4.16.0
+urllib3==2.7.0
+wxPython==4.2.5
+yandex-music==3.0.0
