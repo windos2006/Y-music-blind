@@ -4,12 +4,12 @@ import json
 import os
 import logging
 from typing import Optional
-from utils import get_resource_path
+from utils import get_data_dir
 
 logger = logging.getLogger(__name__)
 
-ACCOUNTS_FILE = get_resource_path("accounts.json")
-AUTH_DATA_FILE = get_resource_path("auth_data.json")
+ACCOUNTS_FILE = os.path.join(get_data_dir(), "accounts.json")
+AUTH_DATA_FILE = os.path.join(get_data_dir(), "auth_data.json")
 
 class AccountManager:
     """Управляет учётными записями Яндекс.Музыки.

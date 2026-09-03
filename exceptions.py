@@ -24,6 +24,3 @@ class AccountError(YMusicBaseError):
 
 class DeviceAuthCanceled(YMusicBaseError):
     """Авторизация устройства была отменена пользователем."""
-
-class GenreLoadError(YMusicBaseError):
-    """Ошибка загрузки треков жанра."""

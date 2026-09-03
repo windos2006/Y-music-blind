@@ -4,6 +4,7 @@ import sys
 import os
 import platform
 import struct
+from utils import get_data_dir
 
 def log_system_info():
     """Логирует информацию о системе при запуске: версия, ОС, архитектура, Python, библиотеки."""
@@ -58,34 +59,45 @@ def log_system_info():
 
 
 def setup_logger(config):
+    enable_logging = config.get("enable_logging", True)
     log_level_str = config.get("log_level", "INFO")
     level = getattr(logging, log_level_str.upper(), logging.INFO)
     clear_logs = config.get("clear_logs_on_startup", True)
-    
-    file_mode = 'w' if clear_logs else 'a'
-    
+
     logger = logging.getLogger()
+
+    # Убираем старые обработчики, чтобы переинициализация не дублировала записи
+    for handler in list(logger.handlers):
+        logger.removeHandler(handler)
+
+    if not enable_logging:
+        logger.setLevel(logging.CRITICAL + 1)
+        return
+
     logger.setLevel(level)
-    
+
+    file_mode = 'w' if clear_logs else 'a'
+
     # Формат: Уровень - Дата - Модуль - Сообщение
     formatter = logging.Formatter('%(levelname)s - %(asctime)s - %(module)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-    
+
     # Файловый логгер
-    fh = logging.FileHandler('wm_music_blind.log', mode=file_mode, encoding='utf-8')
+    log_path = os.path.join(get_data_dir(), 'wm_music_blind.log')
+    fh = logging.FileHandler(log_path, mode=file_mode, encoding='utf-8')
     fh.setFormatter(formatter)
     logger.addHandler(fh)
-    
+
     # Логгер в консоль (для отладки)
     ch = logging.StreamHandler()
     ch.setFormatter(formatter)
     logger.addHandler(ch)
-    
+
     # Исправление для yandex_music: явно указываем обработчики для пространства имен библиотеки
     ym_logger = logging.getLogger("yandex_music")
     ym_logger.setLevel(level)
     ym_logger.addHandler(fh)
     ym_logger.addHandler(ch)
-    
+
     # Глобальный перехват необработанных исключений
     def handle_exception(exc_type, exc_value, exc_traceback):
         if issubclass(exc_type, KeyboardInterrupt):
@@ -94,3 +106,15 @@ def setup_logger(config):
         logger.error("Необработанное исключение", exc_info=(exc_type, exc_value, exc_traceback))
 
     sys.excepthook = handle_exception
+
+
+def log_exception(context: str, exc: Exception = None, exc_info=None) -> None:
+    """Логирует исключение с полной трассировкой стека.
+
+    Используется для обработчиков ошибок, чтобы даже «обработанные»
+    исключения попадали в журнал приложения с контекстом.
+    """
+    logger = logging.getLogger(__name__)
+    if exc_info is None and exc is not None:
+        exc_info = (type(exc), exc, exc.__traceback__)
+    logger.error("Ошибка: %s", context, exc_info=exc_info)
